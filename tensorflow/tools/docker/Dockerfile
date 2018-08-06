@@ -16,6 +16,11 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         rsync \
         software-properties-common \
         unzip \
+	r-base \
+	r-base-dev \
+	libssl-dev \
+	libcurl4-openssl-dev \
+	libxml2-dev \
         && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
@@ -34,14 +39,22 @@ RUN pip --no-cache-dir install \
         pandas \
         scipy \
         sklearn \
+	keras \
+	virtualenv \
         && \
     python -m ipykernel.kernelspec
+
+RUN R -e "install.packages(c('keras', 'devtools', 'caret', 'rpart', 'tidyverse', 'optparse', 'testthat', 'corrplot', 'repr', 'IRdisplay', 'evaluate', 'crayon', 'pbdZMQ', 'devtools', 'uuid', 'digest'), quiet = FALSE, repos = c('https://pbil.univ-lyon1.fr/CRAN/','https://mirror.ibcp.fr/pub/CRAN/'))"
+RUN R -e "keras::install_keras()"
+RUN R -e "devtools::install_github('IRkernel/IRkernel')"
+RUN R -e "IRkernel::installspec()"
 
 # --- DO NOT EDIT OR DELETE BETWEEN THE LINES --- #
 # These lines will be edited automatically by parameterized_docker_build.sh. #
 # COPY _PIP_FILE_ /
 # RUN pip --no-cache-dir install /_PIP_FILE_
 # RUN rm -f /_PIP_FILE_
+
 
 # Install TensorFlow CPU version from central repo
 RUN pip --no-cache-dir install \
