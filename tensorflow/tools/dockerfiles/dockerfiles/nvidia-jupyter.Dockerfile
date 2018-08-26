@@ -86,6 +86,7 @@ RUN R -e "devtools::install_github('IRkernel/IRkernel')"
 ARG TF_PACKAGE=tensorflow-gpu
 RUN ${PIP} install ${TF_PACKAGE}
 RUN ${PIP} install keras
+RUN ${PIP} install theano
 
 COPY bashrc /etc/bash.bashrc
 RUN chmod a+rwx /etc/bash.bashrc
@@ -95,6 +96,8 @@ RUN ${PIP} install jupyter
 RUN mkdir /notebooks && chmod a+rwx /notebooks
 RUN mkdir /.local && chmod a+rwx /.local
 RUN R -e "IRkernel::installspec()"
+RUN ${PIP} install jupyterthemes
+RUN jt -t onedork jt -cellw 90%
 WORKDIR /notebooks
 EXPOSE 8888
 
