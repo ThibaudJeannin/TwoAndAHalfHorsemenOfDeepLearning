@@ -170,7 +170,8 @@ Status RunRestore(const RunOptions& run_options, const string& export_dir,
       variables_directory, MetaFilename(kSavedModelVariablesFilename));
   if (!Env::Default()->FileExists(variables_index_path).ok()) {
     LOG(INFO) << "The specified SavedModel has no variables; no checkpoints "
-                 "were restored.";
+                 "were restored. File does not exist: "
+              << variables_index_path;
     return Status::OK();
   }
   const string variables_path =
@@ -181,7 +182,7 @@ Status RunRestore(const RunOptions& run_options, const string& export_dir,
   variables_path_tensor.scalar<string>()() = variables_path;
 
   std::vector<std::pair<string, Tensor>> inputs = {
-      {variable_filename_const_op_name.ToString(), variables_path_tensor}};
+      {string(variable_filename_const_op_name), variables_path_tensor}};
 
   AddAssetsTensorsToInputs(export_dir, asset_file_defs, &inputs);
 

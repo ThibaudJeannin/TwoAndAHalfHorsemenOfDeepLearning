@@ -1223,11 +1223,10 @@ tensorflow::Status ConvertGatherOperator(
   return tensorflow::Status::OK();
 }
 
-template <typename Op, const char* op_name>
+template <typename Op>
 tensorflow::Status ConvertArgMinMaxOperator(
     const NodeDef& node, const TensorFlowImportFlags& tf_import_flags,
     Model* model) {
-  CHECK_EQ(node.op(), op_name);
   TF_QCHECK_OK(CheckInputsCount(node, tf_import_flags, 2));
   const auto axis_data_type =
       HasAttr(node, "Tidx") ? GetDataTypeAttr(node, "Tidx") : DT_INT32;
@@ -1243,6 +1242,20 @@ tensorflow::Status ConvertArgMinMaxOperator(
   op->outputs.push_back(node.name());
   model->operators.emplace_back(op);
   return tensorflow::Status::OK();
+}
+
+tensorflow::Status ConvertArgMaxOperator(
+    const NodeDef& node, const TensorFlowImportFlags& tf_import_flags,
+    Model* model) {
+  CHECK_EQ(node.op(), "ArgMax");
+  return ConvertArgMinMaxOperator<ArgMaxOperator>(node, tf_import_flags, model);
+}
+
+tensorflow::Status ConvertArgMinOperator(
+    const NodeDef& node, const TensorFlowImportFlags& tf_import_flags,
+    Model* model) {
+  CHECK_EQ(node.op(), "ArgMin");
+  return ConvertArgMinMaxOperator<ArgMinOperator>(node, tf_import_flags, model);
 }
 
 tensorflow::Status ConvertResizeBilinearOperator(
@@ -1559,6 +1572,26 @@ tensorflow::Status ConvertPackOperator(
   op->axis = HasAttr(node, "axis") ? GetIntAttr(node, "axis") : 0;
   op->dtype = ConvertDataType(toco::GetDataTypeAttr(node, "T"));
   op->outputs.push_back(node.name());
+  model->operators.emplace_back(std::move(op));
+  return tensorflow::Status::OK();
+}
+
+tensorflow::Status ConvertUnpackOperator(
+    const NodeDef& node, const TensorFlowImportFlags& tf_import_flags,
+    Model* model) {
+  CHECK_EQ(node.op(), "Unpack");
+  auto op = absl::make_unique<UnpackOperator>();
+  const int num_inputs = GetInputsCount(node, tf_import_flags);
+  QCHECK_EQ(num_inputs, 1);
+  op->inputs.push_back(node.input(0));
+  op->num = GetIntAttr(node, "num");
+  op->axis = HasAttr(node, "axis") ? GetIntAttr(node, "axis") : 0;
+  op->dtype = ConvertDataType(toco::GetDataTypeAttr(node, "T"));
+
+  op->outputs.push_back(node.name());  // Implicit :0.
+  for (int i = 1; i < op->num; ++i) {
+    op->outputs.push_back(node.name() + ":" + std::to_string(i));
+  }
   model->operators.emplace_back(std::move(op));
   return tensorflow::Status::OK();
 }
@@ -1899,17 +1932,14 @@ using ConverterType = tensorflow::Status (*)(
     Model* model);
 using ConverterMapType = std::unordered_map<std::string, ConverterType>;
 
-constexpr char kArgMax[] = "ArgMax";
-constexpr char kArgMin[] = "ArgMin";
-
 ConverterMapType GetTensorFlowNodeConverterMap() {
   return std::unordered_map<std::string, ConverterType>({
       {"Add", ConvertSimpleOperator<AddOperator, 2>},
       {"AddN", ConvertSimpleOperator<AddNOperator>},
       {"All", ConvertSimpleOperator<TensorFlowAllOperator>},
       {"Any", ConvertAnyOperator},
-      {"ArgMax", ConvertArgMinMaxOperator<ArgMaxOperator, kArgMax>},
-      {"ArgMin", ConvertArgMinMaxOperator<ArgMinOperator, kArgMin>},
+      {"ArgMax", ConvertArgMaxOperator},
+      {"ArgMin", ConvertArgMinOperator},
       {"Assert", ConvertSimpleOperator<TensorFlowAssertOperator>},
       {"AvgPool", ConvertAvgPoolOperator},
       {"BatchMatMul", ConvertBatchMatMulOperator},
@@ -2010,6 +2040,7 @@ ConverterMapType GetTensorFlowNodeConverterMap() {
       {"TopK", ConvertTopKV2Operator},
       {"TopKV2", ConvertTopKV2Operator},
       {"Transpose", ConvertSimpleOperator<TransposeOperator, 2>},
+      {"Unpack", ConvertUnpackOperator},
   });
 }
 

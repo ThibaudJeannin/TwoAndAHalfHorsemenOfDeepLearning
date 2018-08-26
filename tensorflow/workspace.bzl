@@ -19,6 +19,10 @@ load(
     "//tensorflow/tools/def_file_filter:def_file_filter_configure.bzl",
     "def_file_filter_configure",
 )
+load("//third_party/flatbuffers:workspace.bzl", flatbuffers = "repo")
+
+def initialize_third_party():
+    flatbuffers()
 
 # Sanitize a dependency so that it works correctly from code that includes
 # TensorFlow as a submodule.
@@ -39,6 +43,8 @@ def tf_workspace(path_prefix = "", tf_repo_name = ""):
     sycl_configure(name = "local_config_sycl")
     syslibs_configure(name = "local_config_syslibs")
     python_configure(name = "local_config_python")
+
+    initialize_third_party()
 
     # For windows bazel build
     # TODO: Remove def file filter when TensorFlow can export symbols properly on Windows.
@@ -100,11 +106,11 @@ def tf_workspace(path_prefix = "", tf_repo_name = ""):
     tf_http_archive(
         name = "com_google_absl",
         urls = [
-            "https://mirror.bazel.build/github.com/abseil/abseil-cpp/archive/9613678332c976568272c8f4a78631a29159271d.tar.gz",
-            "https://github.com/abseil/abseil-cpp/archive/9613678332c976568272c8f4a78631a29159271d.tar.gz",
+            "https://mirror.bazel.build/github.com/abseil/abseil-cpp/archive/fefc83638fb69395d259ed245699310610429064.tar.gz",
+            "https://github.com/abseil/abseil-cpp/archive/fefc83638fb69395d259ed245699310610429064.tar.gz",
         ],
-        sha256 = "1273a1434ced93bc3e703a48c5dced058c95e995c8c009e9bdcb24a69e2180e9",
-        strip_prefix = "abseil-cpp-9613678332c976568272c8f4a78631a29159271d",
+        sha256 = "e5f94a6fcc42cb3f312987a1f8c1a62a915bab4df993cf6cde95f64f2d264259",
+        strip_prefix = "abseil-cpp-fefc83638fb69395d259ed245699310610429064",
         build_file = clean_dep("//third_party:com_google_absl.BUILD"),
     )
 
@@ -157,22 +163,22 @@ def tf_workspace(path_prefix = "", tf_repo_name = ""):
     tf_http_archive(
         name = "com_googlesource_code_re2",
         urls = [
-            "https://mirror.bazel.build/github.com/google/re2/archive/2018-04-01.tar.gz",
-            "https://github.com/google/re2/archive/2018-04-01.tar.gz",
+            "https://mirror.bazel.build/github.com/google/re2/archive/2018-07-01.tar.gz",
+            "https://github.com/google/re2/archive/2018-07-01.tar.gz",
         ],
-        sha256 = "2f945446b71336e7f5a2bcace1abcf0b23fbba368266c6a1be33de3de3b3c912",
-        strip_prefix = "re2-2018-04-01",
+        sha256 = "803c7811146edeef8f91064de37c6f19136ff01a2a8cdb3230e940b2fd9f07fe",
+        strip_prefix = "re2-2018-07-01",
         system_build_file = clean_dep("//third_party/systemlibs:re2.BUILD"),
     )
 
     tf_http_archive(
         name = "com_github_googlecloudplatform_google_cloud_cpp",
         urls = [
-            "https://mirror.bazel.build/github.com/GoogleCloudPlatform/google-cloud-cpp/archive/f875700a023bdd706333cde45aee8758b272c357.tar.gz",
-            "https://github.com/GoogleCloudPlatform/google-cloud-cpp/archive/f875700a023bdd706333cde45aee8758b272c357.tar.gz",
+            "https://mirror.bazel.build/github.com/GoogleCloudPlatform/google-cloud-cpp/archive/14760a86c4ffab9943b476305c4fe927ad95db1c.tar.gz",
+            "https://github.com/GoogleCloudPlatform/google-cloud-cpp/archive/14760a86c4ffab9943b476305c4fe927ad95db1c.tar.gz",
         ],
-        sha256 = "a34f3c50b237686dc870b13baaa6a5836ce3473f2f2a02717299f0ff318372db",
-        strip_prefix = "google-cloud-cpp-f875700a023bdd706333cde45aee8758b272c357",
+        sha256 = "fdd3b3aecce60987e5525e55bf3a21d68a8695320bd5b980775af6507eec3944",
+        strip_prefix = "google-cloud-cpp-14760a86c4ffab9943b476305c4fe927ad95db1c",
     )
 
     tf_http_archive(
@@ -395,21 +401,22 @@ def tf_workspace(path_prefix = "", tf_repo_name = ""):
     tf_http_archive(
         name = "nsync",
         urls = [
-            "https://mirror.bazel.build/github.com/google/nsync/archive/1.20.0.tar.gz",
-            "https://github.com/google/nsync/archive/1.20.0.tar.gz",
+            "https://mirror.bazel.build/github.com/google/nsync/archive/1.20.1.tar.gz",
+            "https://github.com/google/nsync/archive/1.20.1.tar.gz",
         ],
-        sha256 = "0c1b03962b2f8450f21e74a5a46116bf2d6009a807c57eb4207e974a8c4bb7dd",
-        strip_prefix = "nsync-1.20.0",
+        sha256 = "692f9b30e219f71a6371b98edd39cef3cbda35ac3abc4cd99ce19db430a5591a",
+        strip_prefix = "nsync-1.20.1",
+        system_build_file = clean_dep("//third_party/systemlibs:nsync.BUILD"),
     )
 
     tf_http_archive(
         name = "com_google_googletest",
         urls = [
-            "https://mirror.bazel.build/github.com/google/googletest/archive/9816b96a6ddc0430671693df90192bbee57108b6.zip",
-            "https://github.com/google/googletest/archive/9816b96a6ddc0430671693df90192bbee57108b6.zip",
+            "https://mirror.bazel.build/github.com/google/googletest/archive/997d343dd680e541ef96ce71ee54a91daf2577a0.zip",
+            "https://github.com/google/googletest/archive/997d343dd680e541ef96ce71ee54a91daf2577a0.zip",
         ],
-        sha256 = "9cbca84c4256bed17df2c8f4d00c912c19d247c11c9ba6647cd6dd5b5c996b8d",
-        strip_prefix = "googletest-9816b96a6ddc0430671693df90192bbee57108b6",
+        sha256 = "353ab86e35cea1cd386115279cf4b16695bbf21b897bfbf2721cf4cb5f64ade8",
+        strip_prefix = "googletest-997d343dd680e541ef96ce71ee54a91daf2577a0",
     )
 
     tf_http_archive(
@@ -486,11 +493,11 @@ def tf_workspace(path_prefix = "", tf_repo_name = ""):
     tf_http_archive(
         name = "llvm",
         urls = [
-            "https://mirror.bazel.build/github.com/llvm-mirror/llvm/archive/7b3bfc8151f3a6bcd9642c49c1f86f66cc43a428.tar.gz",
-            "https://github.com/llvm-mirror/llvm/archive/7b3bfc8151f3a6bcd9642c49c1f86f66cc43a428.tar.gz",
+            "https://mirror.bazel.build/github.com/llvm-mirror/llvm/archive/97d7bcd5c024ee6aec4eecbc723bb6d4f4c3dc3d.tar.gz",
+            "https://github.com/llvm-mirror/llvm/archive/97d7bcd5c024ee6aec4eecbc723bb6d4f4c3dc3d.tar.gz",
         ],
-        sha256 = "c6cbb21acd46e3e00faa8c379595ecffb99ef77622da17f29371db2bfad1d3d3",
-        strip_prefix = "llvm-7b3bfc8151f3a6bcd9642c49c1f86f66cc43a428",
+        sha256 = "2889b79ab979e676e344974cfeefbaf2c21c7c69a015bd584e8ae67b87b136bc",
+        strip_prefix = "llvm-97d7bcd5c024ee6aec4eecbc723bb6d4f4c3dc3d",
         build_file = clean_dep("//third_party/llvm:llvm.autogenerated.BUILD"),
     )
 
@@ -521,11 +528,11 @@ def tf_workspace(path_prefix = "", tf_repo_name = ""):
     tf_http_archive(
         name = "boringssl",
         urls = [
-            "https://mirror.bazel.build/github.com/google/boringssl/archive/a0fb951d2a26a8ee746b52f3ba81ab011a0af778.tar.gz",
-            "https://github.com/google/boringssl/archive/a0fb951d2a26a8ee746b52f3ba81ab011a0af778.tar.gz",
+            "https://mirror.bazel.build/github.com/google/boringssl/archive/7f634429a04abc48e2eb041c81c5235816c96514.tar.gz",
+            "https://github.com/google/boringssl/archive/7f634429a04abc48e2eb041c81c5235816c96514.tar.gz",
         ],
-        sha256 = "524ba98a56300149696481b4cb9ddebd0c7b7ac9b9f6edee81da2d2d7e5d2bb3",
-        strip_prefix = "boringssl-a0fb951d2a26a8ee746b52f3ba81ab011a0af778",
+        sha256 = "1188e29000013ed6517168600fc35a010d58c5d321846d6a6dfee74e4c788b45",
+        strip_prefix = "boringssl-7f634429a04abc48e2eb041c81c5235816c96514",
     )
 
     tf_http_archive(
@@ -576,11 +583,11 @@ def tf_workspace(path_prefix = "", tf_repo_name = ""):
     tf_http_archive(
         name = "kafka",
         urls = [
-            "https://mirror.bazel.build/github.com/edenhill/librdkafka/archive/v0.11.4.tar.gz",
-            "https://github.com/edenhill/librdkafka/archive/v0.11.4.tar.gz",
+            "https://mirror.bazel.build/github.com/edenhill/librdkafka/archive/v0.11.5.tar.gz",
+            "https://github.com/edenhill/librdkafka/archive/v0.11.5.tar.gz",
         ],
-        sha256 = "9d8f1eb7b0e29e9ab1168347c939cb7ae5dff00a39cef99e7ef033fd8f92737c",
-        strip_prefix = "librdkafka-0.11.4",
+        sha256 = "cc6ebbcd0a826eec1b8ce1f625ffe71b53ef3290f8192b6cae38412a958f4fd3",
+        strip_prefix = "librdkafka-0.11.5",
         build_file = clean_dep("//third_party:kafka/BUILD"),
         patch_file = clean_dep("//third_party/kafka:config.patch"),
     )
@@ -733,18 +740,6 @@ def tf_workspace(path_prefix = "", tf_repo_name = ""):
         build_file = clean_dep("//third_party:arm_neon_2_x86_sse.BUILD"),
     )
 
-    tf_http_archive(
-        name = "flatbuffers",
-        strip_prefix = "flatbuffers-1.9.0",
-        sha256 = "5ca5491e4260cacae30f1a5786d109230db3f3a6e5a0eb45d0d0608293d247e3",
-        urls = [
-            "https://mirror.bazel.build/github.com/google/flatbuffers/archive/v1.9.0.tar.gz",
-            "https://github.com/google/flatbuffers/archive/v1.9.0.tar.gz",
-        ],
-        build_file = clean_dep("//third_party/flatbuffers:flatbuffers.BUILD"),
-        system_build_file = clean_dep("//third_party/systemlibs:flatbuffers.BUILD"),
-    )
-
     native.new_http_archive(
         name = "double_conversion",
         urls = [
@@ -823,6 +818,39 @@ def tf_workspace(path_prefix = "", tf_repo_name = ""):
             "https://github.com/bazelbuild/rules_android/archive/v0.1.1.zip",
         ],
         strip_prefix = "rules_android-0.1.1",
+    )
+
+    tf_http_archive(
+        name = "ngraph",
+        urls = [
+            "https://mirror.bazel.build/github.com/NervanaSystems/ngraph/archive/v0.5.0.tar.gz",
+            "https://github.com/NervanaSystems/ngraph/archive/v0.5.0.tar.gz",
+        ],
+        sha256 = "cb35d3d98836f615408afd18371fb13e3400711247e0d822ba7f306c45e9bb2c",
+        strip_prefix = "ngraph-0.5.0",
+        build_file = clean_dep("//third_party/ngraph:ngraph.BUILD"),
+    )
+
+    tf_http_archive(
+        name = "nlohmann_json_lib",
+        urls = [
+            "https://mirror.bazel.build/github.com/nlohmann/json/archive/v3.1.1.tar.gz",
+            "https://github.com/nlohmann/json/archive/v3.1.1.tar.gz",
+        ],
+        sha256 = "9f3549824af3ca7e9707a2503959886362801fb4926b869789d6929098a79e47",
+        strip_prefix = "json-3.1.1",
+        build_file = clean_dep("//third_party/ngraph:nlohmann_json.BUILD"),
+    )
+
+    tf_http_archive(
+        name = "ngraph_tf",
+        urls = [
+            "https://mirror.bazel.build/github.com/NervanaSystems/ngraph-tf/archive/v0.3.0-rc1.tar.gz",
+            "https://github.com/NervanaSystems/ngraph-tf/archive/v0.3.0-rc1.tar.gz",
+        ],
+        sha256 = "7919332cb15120101c3e05c1b969a5e029a6411581312583c8f80b6aaaa83072",
+        strip_prefix = "ngraph-tf-0.3.0-rc1",
+        build_file = clean_dep("//third_party/ngraph:ngraph_tf.BUILD"),
     )
 
     ##############################################################################

@@ -227,6 +227,8 @@ def generated_test_models():
         "constant",
         "control_dep",
         "conv",
+        "conv_with_shared_weights",
+        "conv_to_depthwiseconv_with_shared_weights",
         "depthwiseconv",
         "div",
         "equal",
@@ -247,7 +249,9 @@ def generated_test_models():
         "local_response_norm",
         "log_softmax",
         "log",
+        "logical_and",
         "logical_or",
+        "logical_xor",
         "lstm",
         "max_pool",
         "maximum",
@@ -263,7 +267,8 @@ def generated_test_models():
         "prelu",
         "pow",
         "reduce_max",
-        #"reduce_prod",  # disabled due to b/111823366
+        "reduce_min",
+        "reduce_prod",
         "relu",
         "relu1",
         "relu6",
@@ -288,6 +293,7 @@ def generated_test_models():
         "topk",
         "transpose",
         #"transpose_conv",   # disabled due to b/111213074
+        "unpack",
         "where",
     ]
 

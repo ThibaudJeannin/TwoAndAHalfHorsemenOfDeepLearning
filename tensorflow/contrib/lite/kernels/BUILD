@@ -14,7 +14,10 @@ EXTRA_EIGEN_COPTS = select({
         "-Wno-error=invalid-partial-specialization",
         "-Wno-error=reorder",
     ],
-    "//tensorflow:windows": [],
+    "//tensorflow:windows": [
+        "/DEIGEN_HAS_C99_MATH",
+        "/DEIGEN_AVOID_STL_ARRAY",
+    ],
     "//conditions:default": ["-Wno-error=reorder"],
 })
 
@@ -208,6 +211,7 @@ cc_library(
         "transpose_conv.cc",
         "unidirectional_sequence_lstm.cc",
         "unidirectional_sequence_rnn.cc",
+        "unpack.cc",
     ],
     hdrs = [
         "padding.h",
@@ -222,6 +226,7 @@ cc_library(
         "//tensorflow/contrib/lite:builtin_op_data",
         "//tensorflow/contrib/lite:framework",
         "//tensorflow/contrib/lite:string_util",
+        "//tensorflow/contrib/lite:util",
         "//tensorflow/contrib/lite/kernels:gemm_support",
         "//tensorflow/contrib/lite/kernels/internal:audio_utils",
         "//tensorflow/contrib/lite/kernels/internal:kernel_utils",
@@ -1187,6 +1192,20 @@ tf_cc_test(
     name = "logical_test",
     size = "small",
     srcs = ["logical_test.cc"],
+    tags = ["tflite_not_portable_ios"],
+    deps = [
+        ":builtin_ops",
+        "//tensorflow/contrib/lite:builtin_op_data",
+        "//tensorflow/contrib/lite:framework",
+        "//tensorflow/contrib/lite/kernels:test_util",
+        "@com_google_googletest//:gtest",
+    ],
+)
+
+tf_cc_test(
+    name = "unpack_test",
+    size = "small",
+    srcs = ["unpack_test.cc"],
     tags = ["tflite_not_portable_ios"],
     deps = [
         ":builtin_ops",

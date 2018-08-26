@@ -168,6 +168,7 @@ If bazel is not installed on your system, install it now by following
 To build TensorFlow, you must install the following packages:
 
 *   six
+*   mock
 *   numpy, which is a numerical processing package that TensorFlow requires.
 *   wheel, which enables you to manage Python compressed packages in the wheel
     (.whl) format.
@@ -179,13 +180,16 @@ If you follow these instructions, you will not need to disable SIP.
 
 After installing pip, invoke the following commands:
 
-<pre> $ <b>sudo pip install six numpy wheel</b> </pre>
+<pre> $ <b>pip install six numpy wheel mock h5py</b>
+ $ <b>pip install keras_applications==1.0.5 --no-deps</b>
+ $ <b>pip install keras_preprocessing==1.0.3 --no-deps</b>
+</pre>
 
 Note: These are just the minimum requirements to _build_ tensorflow. Installing
 the pip package will download additional packages required to _run_ it. If you
 plan on executing tasks directly with `bazel` , without the pip installation,
 you may need to install additional python packages. For example, you should `pip
-install mock enum34` before running TensorFlow's tests with bazel.
+install enum34` before running TensorFlow's tests with bazel.
 
 <a name="ConfigureInstallation"></a>
 
@@ -360,6 +364,8 @@ continue to work against your built package.
 If RAM is an issue on your system, you may limit RAM usage by specifying
 <code>--local_resources 2048,.5,1.0</code> while invoking `bazel`.
 
+### Run the build_pip_package script
+
 The <code>bazel build</code> command builds a script named `build_pip_package`.
 Running this script as follows will build a `.whl` file within the
 `/tmp/tensorflow_pkg` directory:
@@ -374,10 +380,10 @@ Invoke `pip install` to install that pip package. The filename of the `.whl`
 file depends on your platform. For example, the following command will install
 the pip package
 
-for TensorFlow 1.10.0rc1 on Linux:
+for TensorFlow 1.10.0 on Linux:
 
 <pre>
-$ <b>sudo pip install /tmp/tensorflow_pkg/tensorflow-1.10.0rc1-py2-none-any.whl</b>
+$ <b>sudo pip install /tmp/tensorflow_pkg/tensorflow-1.10.0-py2-none-any.whl</b>
 </pre>
 
 ## Validate your installation

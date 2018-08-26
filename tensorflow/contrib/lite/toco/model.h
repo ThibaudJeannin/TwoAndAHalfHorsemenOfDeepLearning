@@ -149,6 +149,7 @@ enum class OperatorType : uint8 {
   kLogicalNot,
   kLogicalOr,
   kCTCBeamSearchDecoder,
+  kUnpack,
 };
 
 // Helper to deal with TensorFlow arrays using a different ordering of
@@ -1828,6 +1829,20 @@ struct LogicalOrOperator : Operator {
   LogicalOrOperator() : Operator(OperatorType::kLogicalOr) {}
 };
 
+// Unpack operator:
+//
+// Inputs:
+// Inputs[0]: required: A boolean input tensor.
+// Inputs[1]: required: reduction_indices.
+//
+// TensorFlow equivalent: tf.unstack.
+struct UnpackOperator : Operator {
+  UnpackOperator() : Operator(OperatorType::kUnpack) {}
+  int num;
+  int axis;
+  ArrayDataType dtype = ArrayDataType::kNone;
+};
+
 // Alloc's are used for transient arrays only. An Alloc specifies which interval
 // of the "transient_data" workspace buffer passed to inference functions, is to
 // be used for the transient array at hand. The 'start' and 'end' values are
@@ -2071,7 +2086,7 @@ class Model {
   std::size_t transient_data_size = 0;
   // For code-generation only: required alignment of the transient_data buffer
   std::size_t transient_data_alignment = 0;
-  // Arithmatic operations performed in the model.
+  // Arithmetic operations performed in the model.
   int64 ops_count = 0;
 
  private:

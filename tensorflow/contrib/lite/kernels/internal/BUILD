@@ -293,7 +293,6 @@ cc_library(
         ":round",
         ":strided_slice_logic",
         ":types",
-        "//third_party/eigen3",
         "@gemmlowp",
         "//tensorflow/contrib/lite:builtin_op_data",
     ] + select({
@@ -324,7 +323,6 @@ cc_library(
         ":round",
         ":strided_slice_logic",
         ":types",
-        "//third_party/eigen3",
         "@gemmlowp",
         "//tensorflow/contrib/lite:builtin_op_data",
     ] + select({
@@ -496,6 +494,7 @@ cc_library(
     hdrs = ["test_util.h"],
     deps = [
         ":types",
+        "//tensorflow/contrib/lite:string",
     ],
 )
 
@@ -538,7 +537,10 @@ cc_test(
 cc_test(
     name = "depthwiseconv_quantized_test",
     srcs = ["depthwiseconv_quantized_test.cc"],
-    tags = ["no_oss"],
+    tags = [
+        "no_oss",
+        "tflite_not_portable_ios",
+    ],
     deps = [
         ":optimized_base",
         ":reference_base",
@@ -576,6 +578,7 @@ cc_test(
         ":quantization_util",
         ":reference_base",
         ":test_util",
+        "//tensorflow/contrib/lite:string",
         "@com_google_googletest//:gtest_main",
     ],
 )
@@ -595,6 +598,7 @@ cc_test(
         ":quantization_util",
         ":reference_base",
         ":test_util",
+        "//tensorflow/contrib/lite:string",
         "@com_google_googletest//:gtest_main",
     ],
 )
@@ -606,6 +610,7 @@ cc_test(
     deps = [
         ":optimized_base",
         ":reference_base",
+        "//tensorflow/contrib/lite:string",
         "@com_google_googletest//:gtest_main",
     ],
 )

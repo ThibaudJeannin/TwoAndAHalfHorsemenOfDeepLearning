@@ -112,16 +112,28 @@ class ShapeInference {
   // filter (rhs) to lhs in the way specified by the fields on window.
   static StatusOr<Shape> InferConvolveShape(
       const Shape& lhs, const Shape& rhs, const Window& window,
-      const ConvolutionDimensionNumbers& dimension_numbers);
+      const ConvolutionDimensionNumbers& dimension_numbers,
+      int64 feature_group_count = 1);
 
   // Infers the shape produced by the given FFT type on the given operand.
   static StatusOr<Shape> InferFftShape(
       const Shape& in, FftType fft_type,
       tensorflow::gtl::ArraySlice<int64> fft_length);
 
-  // Infers the shape produced a cross replica sum with the given operand
+  // Infers the shape produced by a cross replica sum with the given operand
   // shapes.
   static StatusOr<Shape> InferCrossReplicaSumShape(
+      tensorflow::gtl::ArraySlice<const Shape*> operand_shapes);
+
+  // Infers final shape of an Alltoall operation that is created by the xla
+  // builder.
+  static StatusOr<Shape> InferAllToAllShape(const Shape& shape,
+                                            int64 split_dimension,
+                                            int64 concat_dimension,
+                                            int64 split_count);
+
+  // Infers the shape of an HLO all-to-all instruction.
+  static StatusOr<Shape> InferAllToAllTupleShape(
       tensorflow::gtl::ArraySlice<const Shape*> operand_shapes);
 
   // Infers the shape produced by applying the given reduction computation
@@ -264,9 +276,9 @@ class ShapeInference {
   // with the given input shape, gather indices shape and gather dimension
   // numbers.
   static StatusOr<Shape> InferGatherShape(
-      const Shape& input_shape, const Shape& gather_indices_shape,
+      const Shape& input_shape, const Shape& start_indices_shape,
       const GatherDimensionNumbers& gather_dim_numbers,
-      tensorflow::gtl::ArraySlice<int64> window_bounds);
+      tensorflow::gtl::ArraySlice<int64> slice_sizes);
 
   // Helper that validates the given input shape, scatter indices shape, updates
   // shape, and scatter dimension numbers that constitute a scatter operation,

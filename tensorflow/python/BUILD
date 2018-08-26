@@ -44,6 +44,10 @@ load("//tensorflow/core:platform/default/build_config_root.bzl", "tf_additional_
 load("//tensorflow/core:platform/default/build_config_root.bzl", "tf_additional_mpi_deps")
 load("//tensorflow/core:platform/default/build_config_root.bzl", "tf_additional_gdr_deps")
 load("//tensorflow/core:platform/default/build_config_root.bzl", "if_static")
+load(
+    "//third_party/ngraph:build_defs.bzl",
+    "if_ngraph",
+)
 
 py_library(
     name = "python",
@@ -130,6 +134,7 @@ py_library(
         "//tensorflow/core:protos_all_py",
         "//tensorflow/python/compat",
         "//tensorflow/python/data",
+        "//tensorflow/python/distribute:estimator_training",
         "//tensorflow/python/feature_column:feature_column_py",
         "//tensorflow/python/keras",
         "//tensorflow/python/ops/distributions",
@@ -138,6 +143,8 @@ py_library(
         "//tensorflow/python/ops/parallel_for",
         "//tensorflow/python/profiler",
         "//tensorflow/python/saved_model",
+        "//tensorflow/python/tools:component_api_helper",
+        "//tensorflow/python/tools/api/generator:create_python_api",
         "//third_party/py/numpy",
     ],
 )
@@ -717,7 +724,6 @@ py_library(
     srcs_version = "PY2AND3",
     deps = [
         ":array_ops",
-        ":cond_v2_impl",
         ":dtypes",
         ":framework_ops",
         ":graph_to_function_def",
@@ -1870,6 +1876,7 @@ py_library(
         ":framework_for_generated_wrappers",
         ":math_ops",
         ":nn_ops_gen",
+        ":numerics",
         "@six_archive//:six",
     ],
 )
@@ -1883,7 +1890,6 @@ py_test(
         ":client_testlib",
         ":clip_ops",
         ":framework_for_generated_wrappers",
-        ":numerics",
         "//third_party/py/numpy",
     ],
 )
@@ -2608,6 +2614,19 @@ py_library(
     ],
 )
 
+py_test(
+    name = "sparse_ops_test",
+    srcs = ["ops/sparse_ops_test.py"],
+    srcs_version = "PY2AND3",
+    deps = [
+        ":constant_op",
+        ":dtypes",
+        ":framework_test_lib",
+        ":sparse_ops",
+        ":sparse_tensor",
+    ],
+)
+
 py_library(
     name = "spectral_grad",
     srcs = ["ops/spectral_grad.py"],
@@ -2779,11 +2798,13 @@ py_library(
     srcs = ["ops/state_ops.py"],
     srcs_version = "PY2AND3",
     deps = [
+        ":array_ops",
         ":framework_ops",
+        ":math_ops_gen",
         ":resource_variable_ops_gen",
         ":state_ops_gen",
         ":tensor_shape",
-        "//tensorflow/python/eager:context",
+        ":util",
     ],
 )
 
@@ -3173,6 +3194,7 @@ cuda_py_test(
         ":partitioned_variables",
         ":variable_scope",
         ":variables",
+        "@absl_py//absl/testing:parameterized",
         "//third_party/py/numpy",
     ],
     tags = ["no_windows"],
@@ -3225,7 +3247,6 @@ py_library(
     ),
     srcs_version = "PY2AND3",
     deps = [
-        "saver",
         ":array_ops",
         ":array_ops_gen",
         ":checkpoint_management",
@@ -3249,6 +3270,7 @@ py_library(
         ":random_ops",
         ":resource_variable_ops",
         ":resources",
+        ":saver",
         ":sdca_ops",
         ":session",
         ":sparse_ops",
@@ -3264,6 +3286,7 @@ py_library(
         "@six_archive//:six",
         "//tensorflow/core:protos_all_py",
         "//tensorflow/python/data/ops:dataset_ops",
+        "//tensorflow/python/distribute:distribute_coordinator_context",
         "//tensorflow/python/eager:backprop",
         "//tensorflow/python/eager:context",
         # `layers` dependency only exists due to the use of a small utility.
@@ -3339,7 +3362,10 @@ py_library(
 
 py_library(
     name = "distribute",
-    srcs = ["training/distribute.py"],
+    srcs = [
+        "training/distribute.py",
+        "training/distribution_strategy_context.py",
+    ],
     srcs_version = "PY2AND3",
     deps = [
         ":array_ops",
@@ -3808,7 +3834,9 @@ tf_py_wrap_cc(
          tf_additional_plugin_deps() +
          tf_additional_verbs_deps() +
          tf_additional_mpi_deps() +
-         tf_additional_gdr_deps()),
+         tf_additional_gdr_deps()) + if_ngraph([
+        "@ngraph_tf//:ngraph_tf",
+    ]),
 )
 
 # ** Targets for Windows build (start) **
@@ -4204,7 +4232,6 @@ cuda_py_test(
         ":math_ops",
         "//tensorflow/core:protos_all_py",
     ],
-    tags = ["no_windows"],
 )
 
 cuda_py_test(
@@ -4498,7 +4525,6 @@ py_test(
     srcs = ["training/saver_large_partitioned_variable_test.py"],
     srcs_version = "PY2AND3",
     tags = [
-        "no_windows",
         "noasan",  # http://b/30782289
         "notsan",  # http://b/30782289
     ],
@@ -4656,7 +4682,10 @@ py_test(
     size = "medium",
     srcs = ["training/monitored_session_test.py"],
     srcs_version = "PY2AND3",
-    tags = ["notsan"],  # b/67945581
+    tags = [
+        "no_pip",
+        "notsan",  # b/67945581
+    ],
     deps = [
         ":array_ops",
         ":checkpoint_management",
@@ -4674,6 +4703,7 @@ py_test(
         "//tensorflow/contrib/framework:framework_py",
         "//tensorflow/contrib/testing:testing_py",
         "//tensorflow/core:protos_all_py",
+        "//tensorflow/python/distribute:distribute_coordinator",
     ],
 )
 

@@ -21,6 +21,7 @@ limitations under the License.
 
 #include "tensorflow/core/platform/logging.h"
 // IWYU pragma: no_include "llvm/IR/Intrinsics.gen.inc"
+#include "absl/algorithm/container.h"
 #include "llvm/IR/BasicBlock.h"
 #include "llvm/IR/Constants.h"
 #include "llvm/IR/Instructions.h"
@@ -64,7 +65,7 @@ IrEmitter::IrEmitter(const HloModuleConfig& hlo_module_config,
       hlo_module_config_(hlo_module_config) {
   b_.setFastMathFlags(llvm_ir::GetFastMathFlags(
       /*fast_math_enabled=*/hlo_module_config.debug_options()
-          .xla_enable_fast_math()));
+          .xla_gpu_enable_fast_math()));
 }
 
 Status IrEmitter::DefaultAction(HloInstruction* hlo) {
@@ -518,7 +519,7 @@ Status IrEmitter::HandleDot(HloInstruction* dot) {
   // We don't have to iterate over the batch dimensions in both arrays, simplify
   // the loop nest of the rhs.
   for (int i = 0; i != dnums.lhs_batch_dimensions_size(); ++i) {
-    DCHECK(c_linear_search(dnums.lhs_batch_dimensions(), i));
+    DCHECK(absl::c_linear_search(dnums.lhs_batch_dimensions(), i));
     rhs_index[i] = lhs_index[i];
   }
 
@@ -632,6 +633,10 @@ Status IrEmitter::HandleParameter(HloInstruction* parameter) {
 }
 
 Status IrEmitter::HandleReduce(HloInstruction* reduce) {
+  // TODO(b/112040122): Support variadic reduce.
+  if (!ShapeUtil::IsArray(reduce->shape())) {
+    return Unimplemented("Variadic reduce is not supported on GPU");
+  }
   auto arg = reduce->operand(0);
   auto init_value = reduce->operand(1);
   tensorflow::gtl::ArraySlice<int64> dimensions(reduce->dimensions());

@@ -129,6 +129,10 @@ TEST_F(OperatorTest, SimpleOperators) {
   CheckSimpleOperator<PowOperator>("POW", OperatorType::kPow);
   CheckSimpleOperator<LogicalOrOperator>("LOGICAL_OR",
                                          OperatorType::kLogicalOr);
+  CheckSimpleOperator<LogicalAndOperator>("LOGICAL_AND",
+                                          OperatorType::kLogicalAnd);
+  CheckSimpleOperator<LogicalNotOperator>("LOGICAL_NOT",
+                                          OperatorType::kLogicalNot);
 }
 
 TEST_F(OperatorTest, BuiltinAdd) {
@@ -469,6 +473,16 @@ TEST_F(OperatorTest, BuiltinOneHot) {
   op.axis = 2;
   auto output_toco_op = SerializeAndDeserialize(
       GetOperator("ONE_HOT", OperatorType::kOneHot), op);
+  EXPECT_EQ(op.axis, output_toco_op->axis);
+}
+
+TEST_F(OperatorTest, BuiltinUnpack) {
+  UnpackOperator op;
+  op.num = 5;
+  op.axis = 2;
+  auto output_toco_op =
+      SerializeAndDeserialize(GetOperator("UNPACK", OperatorType::kUnpack), op);
+  EXPECT_EQ(op.num, output_toco_op->num);
   EXPECT_EQ(op.axis, output_toco_op->axis);
 }
 
