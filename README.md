@@ -1,121 +1,67 @@
-<div align="center">
-  <img src="https://www.tensorflow.org/images/tf_logo_transp.png"><br><br>
-</div>
+# TensorFlow Dockerfiles
 
------------------
+This directory houses TensorFlow's Dockerfiles. **DO NOT EDIT THE DOCKERFILES
+MANUALLY!** They are maintained by `assembler.py`, which builds Dockerfiles from
+the files in `partials/` and the rules in `spec.yml`. See [the Maintaining
+section](#maintaining) for more information.
 
+## Building
 
-| **`Documentation`** |
-|-----------------|
-| [![Documentation](https://img.shields.io/badge/api-reference-blue.svg)](https://www.tensorflow.org/api_docs/) |
+The Dockerfiles in the `dockerfiles` directory must have their build context set
+to **the directory with this README.md** to copy in helper files. For example:
 
-**TensorFlow** is an open source software library for numerical computation using
-data flow graphs.  The graph nodes represent mathematical operations, while
-the graph edges represent the multidimensional data arrays (tensors) that flow
-between them.  This flexible architecture enables you to deploy computation to one
-or more CPUs or GPUs in a desktop, server, or mobile device without rewriting
-code.  TensorFlow also includes [TensorBoard](https://www.tensorflow.org/guide/summaries_and_tensorboard), a data visualization toolkit.
-
-TensorFlow was originally developed by researchers and engineers
-working on the Google Brain team within Google's Machine Intelligence Research
-organization for the purposes of conducting machine learning and deep neural
-networks research.  The system is general enough to be applicable in a wide
-variety of other domains, as well.
-
-TensorFlow provides stable Python API and C APIs as well as without API backwards compatibility guarantee like C++, Go, Java, JavaScript and Swift.
-
-Keep up to date with release announcements and security updates by
-subscribing to
-[announce@tensorflow.org](https://groups.google.com/a/tensorflow.org/forum/#!forum/announce).
-
-## Installation
-*See [Installing TensorFlow](https://www.tensorflow.org/get_started/os_setup.html) for instructions on how to install our release binaries or how to build from source.*
-
-People who are a little more adventurous can also try our nightly binaries:
-
-**Nightly pip packages**
-* We are pleased to announce that TensorFlow now offers nightly pip packages
-under the [tf-nightly](https://pypi.python.org/pypi/tf-nightly) and
-[tf-nightly-gpu](https://pypi.python.org/pypi/tf-nightly-gpu) project on pypi.
-Simply run `pip install tf-nightly` or `pip install tf-nightly-gpu` in a clean
-environment to install the nightly TensorFlow build. We support CPU and GPU
-packages on Linux, Mac, and Windows.
-
-
-#### *Try your first TensorFlow program*
-```shell
-$ python
+```bash
+$ docker build -f ./dockerfiles/cpu.Dockerfile -t tf .
 ```
-```python
->>> import tensorflow as tf
->>> hello = tf.constant('Hello, TensorFlow!')
->>> sess = tf.Session()
->>> sess.run(hello)
-'Hello, TensorFlow!'
->>> a = tf.constant(10)
->>> b = tf.constant(32)
->>> sess.run(a + b)
-42
->>> sess.close()
+
+Each Dockerfile has its own set of available `--build-arg`s which are documented
+in the Dockerfile itself.
+
+## Running
+
+After building the image with the tag `tf` (for example), use `docker run` to
+run the images. Examples are below.
+
+Note for new Docker users: the `-v` and `-u` flags share directories between
+the Docker container and your machine, and very important. Without
+`-v`, your work will be wiped once the container quits, and without `-u`, files
+created by the container will have the wrong file permissions on your host
+machine. If you are confused, check out the [Docker run
+documentation](https://docs.docker.com/engine/reference/run/).
+
+```bash
+# Volume mount (-v) is optional but highly recommended, especially for Jupyter.
+# User permissions (-u) are required if you use (-v).
+
+# CPU-based images
+$ docker run -u $(id -u):$(id -g) -v $(PWD):/my-devel -it tf
+
+# GPU-based images (set up nvidia-docker2 first)
+$ docker run --runtime=nvidia -u $(id -u):$(id -g) -v $(PWD):/my-devel -it tf
+
+# Images with Jupyter run on port 8888, and needs a volume for notebooks
+$ docker run --user $(id -u):$(id -g) -p 8888:8888 -v $(PWD):/notebooks -it tf
 ```
-Learn more examples about how to do specific tasks in TensorFlow at the [tutorials page of tensorflow.org](https://www.tensorflow.org/tutorials/).
 
-## Contribution guidelines
+These images do not come with the TensorFlow source code -- but the development
+images have git included, so you can `git clone` it yourself.
 
-**If you want to contribute to TensorFlow, be sure to review the [contribution
-guidelines](CONTRIBUTING.md). This project adheres to TensorFlow's
-[code of conduct](CODE_OF_CONDUCT.md). By participating, you are expected to
-uphold this code.**
+## Contributing
 
-**We use [GitHub issues](https://github.com/tensorflow/tensorflow/issues) for
-tracking requests and bugs. So please see
-[TensorFlow Discuss](https://groups.google.com/a/tensorflow.org/forum/#!forum/discuss) for general questions
-and discussion, and please direct specific questions to [Stack Overflow](https://stackoverflow.com/questions/tagged/tensorflow).**
+To make changes to TensorFlow's Dockerfiles, you'll update `spec.yml` and the
+`*.partial.Dockerfile` files in the `partials` directory, then run
+`assembler.py` to re-generate the full Dockerfiles before creating a pull
+request.
 
-The TensorFlow project strives to abide by generally accepted best practices in open-source software development:
+You can use the `Dockerfile` in this directory to build an editing environment
+that has all of the Python dependencies you'll need:
 
-[![CII Best Practices](https://bestpractices.coreinfrastructure.org/projects/1486/badge)](https://bestpractices.coreinfrastructure.org/projects/1486)
+```bash
+$ docker build -t tf-assembler -f assembler.Dockerfile .
 
+# Set --user to set correct permissions on generated files
+$ docker run --user $(id -u):$(id -g) -it -v $(pwd):/tf tf-assembler bash 
 
-## Continuous build status
-
-### Official Builds
-
-| Build Type      | Status | Artifacts |
-| ---             | ---    | ---       |
-| **Linux CPU**   | [![Status](https://storage.googleapis.com/tensorflow-kokoro-build-badges/ubuntu-cc.svg)](https://storage.googleapis.com/tensorflow-kokoro-build-badges/ubuntu-cc.html) | [pypi](https://pypi.org/project/tf-nightly/) |
-| **Linux GPU**   | [![Status](https://storage.googleapis.com/tensorflow-kokoro-build-badges/ubuntu-gpu-py3.svg)](https://storage.googleapis.com/tensorflow-kokoro-build-badges/ubuntu-gpu-py3.html) | [pypi](https://pypi.org/project/tf-nightly-gpu/) |
-| **Linux XLA**   | [![Status](https://storage.googleapis.com/tensorflow-kokoro-build-badges/ubuntu-xla.svg)](https://storage.googleapis.com/tensorflow-kokoro-build-badges/ubuntu-xla.html) | TBA |
-| **MacOS**       | [![Status](https://storage.googleapis.com/tensorflow-kokoro-build-badges/macos-py2-cc.svg)](https://storage.googleapis.com/tensorflow-kokoro-build-badges/macos-py2-cc.html) | [pypi](https://pypi.org/project/tf-nightly/) |
-| **Windows CPU** | [![Status](https://storage.googleapis.com/tensorflow-kokoro-build-badges/windows-cpu.svg)](https://storage.googleapis.com/tensorflow-kokoro-build-badges/windows-cpu.html) | [pypi](https://pypi.org/project/tf-nightly/) |
-| **Windows GPU** | [![Status](https://storage.googleapis.com/tensorflow-kokoro-build-badges/windows-gpu.svg)](https://storage.googleapis.com/tensorflow-kokoro-build-badges/windows-gpu.html) | [pypi](https://pypi.org/project/tf-nightly-gpu/) |
-| **Android**     | [![Status](https://storage.googleapis.com/tensorflow-kokoro-build-badges/android.svg)](https://storage.googleapis.com/tensorflow-kokoro-build-badges/android.html) | [![Download](https://api.bintray.com/packages/google/tensorflow/tensorflow/images/download.svg)](https://bintray.com/google/tensorflow/tensorflow/_latestVersion) |
-
-
-### Community Supported Builds
-
-| Build Type      | Status | Artifacts |
-| ---             | ---    | ---       |
-| **IBM s390x**       | [![Build Status](http://ibmz-ci.osuosl.org/job/TensorFlow_IBMZ_CI/badge/icon)](http://ibmz-ci.osuosl.org/job/TensorFlow_IBMZ_CI/) | TBA |
-| **IBM ppc64le CPU** | [![Build Status](http://powerci.osuosl.org/job/TensorFlow_Ubuntu_16.04_CPU/badge/icon)](http://powerci.osuosl.org/job/TensorFlow_Ubuntu_16.04_CPU/) | TBA |
-| **IBM ppc64le GPU** | [![Build Status](http://powerci.osuosl.org/job/TensorFlow_Ubuntu_16.04_PPC64LE_GPU/badge/icon)](http://powerci.osuosl.org/job/TensorFlow_Ubuntu_16.04_PPC64LE_GPU/) | TBA |
-| **Linux CPU with Intel® MKL-DNN** Nightly | [![Build Status](https://tensorflow-ci.intel.com/job/tensorflow-mkl-linux-cpu/badge/icon)](https://tensorflow-ci.intel.com/job/tensorflow-mkl-linux-cpu/) | [Nightly](https://tensorflow-ci.intel.com/job/tensorflow-mkl-build-whl-nightly/) |
-| **Linux CPU with Intel® MKL-DNN** Python 2.7<br> **Linux CPU with Intel® MKL-DNN** Python 3.5<br>  **Linux CPU with Intel® MKL-DNN** Python 3.6 | [![Build Status](https://tensorflow-ci.intel.com/job/tensorflow-mkl-build-release-whl/badge/icon)](https://tensorflow-ci.intel.com/job/tensorflow-mkl-build-release-whl/lastStableBuild)|[1.10.0 py2.7](https://storage.googleapis.com/intel-optimized-tensorflow/tensorflow-1.10.0-cp27-cp27mu-linux_x86_64.whl)<br>[1.10.0 py3.5](https://storage.googleapis.com/intel-optimized-tensorflow/tensorflow-1.10.0-cp35-cp35m-linux_x86_64.whl)<br>[1.10.0 py3.6](https://storage.googleapis.com/intel-optimized-tensorflow/tensorflow-1.10.0-cp36-cp36m-linux_x86_64.whl) |
-
-
-## For more information
-* [Tensorflow Blog](https://medium.com/tensorflow)
-* [TensorFlow Course at Stanford](https://web.stanford.edu/class/cs20si)
-* [TensorFlow Model Zoo](https://github.com/tensorflow/models)
-* [TensorFlow MOOC on Udacity](https://www.udacity.com/course/deep-learning--ud730)
-* [TensorFlow Roadmap](https://www.tensorflow.org/community/roadmap)
-* [Tensorflow Twitter](https://twitter.com/tensorflow)
-* [TensorFlow Website](https://www.tensorflow.org)
-* [TensorFlow White Papers](https://www.tensorflow.org/about/bib)
-* [TensorFlow YouTube Channel](https://www.youtube.com/channel/UC0rqucBdTuFTjJiefW5t-IQ)
-
-Learn more about the TensorFlow community at the [community page of tensorflow.org](https://www.tensorflow.org/community) for a few ways to participate.
-
-## License
-
-[Apache License 2.0](LICENSE)
+# In the container...
+/tf $ python3 ./assembler.py -o dockerfiles -s spec.yml
+```
