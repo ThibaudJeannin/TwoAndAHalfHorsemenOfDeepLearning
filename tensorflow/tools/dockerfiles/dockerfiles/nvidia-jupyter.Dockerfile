@@ -87,6 +87,8 @@ ARG TF_PACKAGE=tensorflow-gpu
 RUN ${PIP} install ${TF_PACKAGE}
 RUN ${PIP} install keras
 RUN ${PIP} install theano
+RUN ${PIP} install pandas
+RUN ${PIP} install sklearn
 
 COPY bashrc /etc/bash.bashrc
 RUN chmod a+rwx /etc/bash.bashrc
