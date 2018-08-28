@@ -78,7 +78,7 @@ RUN mkdir /notebooks && chmod a+rwx /notebooks
 RUN mkdir /.local && chmod a+rwx /.local
 RUN R -e "IRkernel::installspec()"
 RUN ${PIP} install jupyterthemes
-RUN jt -t gruvboxd -cellw 90% -T
+RUN jt -t monokai -cellw 90% -T
 WORKDIR /notebooks
 EXPOSE 8888
 
