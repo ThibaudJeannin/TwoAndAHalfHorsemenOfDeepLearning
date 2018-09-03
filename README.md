@@ -42,8 +42,8 @@ $ docker run --runtime=nvidia -u $(id -u):$(id -g) -v $(PWD):/my-devel -it tf
 # Images with Jupyter run on port 8888, and needs a volume for notebooks
 $ docker run --user $(id -u):$(id -g) -p 8888:8888 -v $(PWD):/notebooks -it tf
 
-# Nvidia image, named container, volume mount the easy way
-$ nvidia-docker run -u $(id -u):$(id -g) --name jupyter -it -p 8888:8888 -v ${PWD}:/notebooks twoandahalfhorsemenofdeeplearnin-nvidia-jupyter
+# Ideal run command (Nvidia image, named container, volume mount the easy way)
+$ nvidia-docker run --name jupyter -it -p 8888:8888 -v ${PWD}:/notebooks twoandahalfhorsemenofdeeplearning-nvidia-jupyter
 ```
 
 These images do not come with the TensorFlow source code -- but the development
