@@ -64,6 +64,7 @@ ARG PYTHON=python${_PY_SUFFIX}
 ARG PIP=pip${_PY_SUFFIX}
 
 RUN apt-get update && apt-get install -y \
+    git \
     ${PYTHON} \
     ${PYTHON}-pip \
     r-base \
