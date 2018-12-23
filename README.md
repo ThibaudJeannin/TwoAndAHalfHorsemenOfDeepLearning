@@ -43,7 +43,7 @@ $ docker run --runtime=nvidia -u $(id -u):$(id -g) -v $(PWD):/my-devel -it tf
 $ docker run --user $(id -u):$(id -g) -p 8888:8888 -v $(PWD):/notebooks -it tf
 
 # Ideal run command (Nvidia image, named container, volume mount the easy way)
-$ nvidia-docker run --name jupyter -it -p 8888:8888 -v ${PWD}:/notebooks twoandahalfhorsemenofdeeplearning-nvidia-jupyter
+$ nvidia-docker run --name jupyter -u $(id -u):$(id -g) -it -p 8888:8888 -v ${PWD}:/notebooks twoandahalfhorsemenofdeeplearning-nvidia-jupyter
 ```
 
 These images do not come with the TensorFlow source code -- but the development
